@@ -85,38 +85,22 @@ public class MinesSweeperModel {
 
         if (left) {
             gameField[x - 1][y].incrementMinesAround();
-        }
-
-        if (up) {
+        }if (up) {
             gameField[x][y - 1].incrementMinesAround();
-        }
-
-        if (down) {
+        }if (down) {
             gameField[x][y + 1].incrementMinesAround();
-        }
-
-        if (right) {
+        }if (right) {
             gameField[x + 1][y].incrementMinesAround();
-        }
-
-        if (right && down) {
+        }if (right && down) {
             gameField[x + 1][y + 1].incrementMinesAround();
-        }
-
-        if (right && up) {
+        }if (right && up) {
             gameField[x + 1][y - 1].incrementMinesAround();
-        }
-
-        if (left && up) {
+        }if (left && up) {
             gameField[x - 1][y - 1].incrementMinesAround();
-        }
-
-        if (left && down) {
+        }if (left && down) {
             gameField[x - 1][y + 1].incrementMinesAround();
         }
 
-
-//       // }
     }
 
     public boolean lose(int x, int y){

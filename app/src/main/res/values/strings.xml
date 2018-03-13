@@ -2,4 +2,5 @@
     <string name="app_name">MinesSweeper</string>
     <string name="end_game">You Lost!</string>
     <string name="win">You Won!</string>
+    <string name="game_title">MinesSweeper</string>
 </resources>

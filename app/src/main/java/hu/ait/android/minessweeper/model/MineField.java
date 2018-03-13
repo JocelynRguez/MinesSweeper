@@ -1,6 +1,8 @@
 package hu.ait.android.minessweeper.model;
 
 
+import android.graphics.Color;
+
 import hu.ait.android.minessweeper.R;
 
 public class MineField {
@@ -74,4 +76,23 @@ public class MineField {
     public void setFlagged() {
         isFlagged = true;
     }
+
+    public int getPaint(){
+
+        switch (minesAround){
+            case 1:
+                return Color.BLUE;
+            case 2:
+                return Color.GREEN;
+            case 3:
+                return Color.RED;
+            case 4:
+                return Color.YELLOW;
+            case 5:
+                return Color.MAGENTA;
+        }
+
+        return Color.BLACK;
+    }
+
 }

@@ -7,6 +7,9 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.drawable.ShapeDrawable;
+import android.graphics.drawable.shapes.OvalShape;
+import android.graphics.drawable.shapes.RectShape;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -29,11 +32,14 @@ public class MinesSweeperView extends View {
     private Paint paintSafe;
 
 
-    private Bitmap bitmap = null;
+    private Bitmap bomb = null;
+    private Bitmap flag = null;
+
     private int gridLayout = 9;
 
     public static final short LOSS = -1;
-    public static final short KEEP_PLAYING = 0;
+    public static final short KEEP_PLAYING = 1;
+
 
     private boolean placingFlag = false;
     public int gameState = 0;
@@ -42,7 +48,7 @@ public class MinesSweeperView extends View {
         super(context, attrs);
 
         paintBackground = new Paint();
-        paintBackground.setColor(Color.GRAY);
+        paintBackground.setColor(Color.rgb(181, 181, 181));
         paintBackground.setStyle(Paint.Style.FILL);
 
         paintLine = new Paint();
@@ -65,8 +71,9 @@ public class MinesSweeperView extends View {
         paintFlag.setStyle(Paint.Style.STROKE);
         paintFlag.setTextSize(100);
 
-        bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.bomb);
-        //bitmap = Bitmap.createScaledBitmap(bitmap, getWidth(), getHeight(), false);
+
+        bomb = BitmapFactory.decodeResource(getResources(), R.drawable.bomb);
+        flag = BitmapFactory.decodeResource(getResources(), R.drawable.flag);
 
         MinesSweeperModel.getInstance().setBombs();
 
@@ -77,7 +84,6 @@ public class MinesSweeperView extends View {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         canvas.drawRect(0, 0, getWidth(), getHeight(), paintBackground);
-
 
         if (gameState == LOSS) {
             drawAll(canvas);
@@ -112,20 +118,24 @@ public class MinesSweeperView extends View {
 
                 drawNumber(canvas, distance, startX, startY);
 
-                MinesSweeperModel.getInstance().getFieldContent(startX, startY).setRevealed();
-                MinesSweeperModel.getInstance().getFieldContent(startX, startY).setWasClicked();
-
-                removeAllZeros(canvas, startX + 1, startY);
-                removeAllZeros(canvas, startX - 1, startY);
-                removeAllZeros(canvas, startX, startY + 1);
-                removeAllZeros(canvas, startX, startY - 1);
-                removeAllZeros(canvas, startX + 1, startY + 1);
-                removeAllZeros(canvas, startX - 1, startY - 1);
-                removeAllZeros(canvas, startX + 1, startY - 1);
-                removeAllZeros(canvas, startX - 1, startY + 1);
+                drawZeros(canvas, startX, startY);
             }
 
         }
+    }
+
+    private void drawZeros(Canvas canvas, int startX, int startY) {
+        MinesSweeperModel.getInstance().getFieldContent(startX, startY).setRevealed();
+        MinesSweeperModel.getInstance().getFieldContent(startX, startY).setWasClicked();
+
+        removeAllZeros(canvas, startX + 1, startY);
+        removeAllZeros(canvas, startX - 1, startY);
+        removeAllZeros(canvas, startX, startY + 1);
+        removeAllZeros(canvas, startX, startY - 1);
+        removeAllZeros(canvas, startX + 1, startY + 1);
+        removeAllZeros(canvas, startX - 1, startY - 1);
+        removeAllZeros(canvas, startX + 1, startY - 1);
+        removeAllZeros(canvas, startX - 1, startY + 1);
     }
 
     private void drawSafe(Canvas canvas) {
@@ -146,8 +156,8 @@ public class MinesSweeperView extends View {
                 removeAllZeros(canvas, x, y);
                 drawNumber(canvas, distance, x, y);
             } else if (MinesSweeperModel.getInstance().getFieldContent(x, y).isFlagged()) {
-                canvas.drawText("F",
-                        x * distance, (y + 1) * distance, paintFlag);
+                flag = Bitmap.createScaledBitmap(flag, distance, distance, false);
+                canvas.drawBitmap(flag, (x*distance) , y*distance , null);
             } else{
                 drawNumber(canvas, distance, x, y);
             }
@@ -157,6 +167,7 @@ public class MinesSweeperView extends View {
     }
 
     private void drawNumber(Canvas canvas, int distance, int x, int y) {
+        paintSafe.setColor(MinesSweeperModel.getInstance().getFieldContent(x,y).getPaint());
         canvas.drawText("" + MinesSweeperModel.getInstance().getFieldContent(x, y).getMinesAround(),
                 x * distance, (y + 1) * distance, paintSafe);
     }
@@ -168,7 +179,9 @@ public class MinesSweeperView extends View {
         for (int x = 0; x < gridLayout; x++) {
             for (int y = 0; y < gridLayout; y++) {
                 if (MinesSweeperModel.getInstance().getFieldContent(x, y).getType() == MineField.BOMB) {
-                    canvas.drawText("B", x * distance, (y + 1) * distance, paintNumbers);
+                    //canvas.drawText("B", x * distance, (y + 1) * distance, paintNumbers);
+                    bomb = Bitmap.createScaledBitmap(bomb, distance, distance, false);
+                    canvas.drawBitmap(bomb, x*distance, y*distance, null);
                 } else {
                     drawNumber(canvas, distance, x, y);
                 }
@@ -183,7 +196,7 @@ public class MinesSweeperView extends View {
         gameState = KEEP_PLAYING;
 
         if (placingFlag) {
-            positionFlag();
+           flagMode();
         }
 
         placingFlag = false;
@@ -200,19 +213,15 @@ public class MinesSweeperView extends View {
             int tX = (int) (event.getX() / (getWidth() / gridLayout));
             int tY = (int) (event.getY() / (getWidth() / gridLayout));
             MinesSweeperModel.getInstance().getFieldContent(tX, tY).setWasClicked();
-
             if (placingFlag) {
                 flaggedBomb(tX, tY);
             }
             gameState(tX, tY);
-
         }
 
         if(gameState != LOSS && MinesSweeperModel.getInstance().win()){
             ((MainActivity) getContext()).showMessage(getContext().getString(R.string.win));
         }
-
-
 
         return true;
     }
@@ -221,18 +230,17 @@ public class MinesSweeperView extends View {
         if (MinesSweeperModel.getInstance().lose(tX, tY) &&
                 !MinesSweeperModel.getInstance().getFieldContent(tX,tY).isFlagged()) {
             gameState = LOSS;
-
             ((MainActivity) getContext()).showMessage(getContext().getString(R.string.end_game));
         }
         invalidate();
     }
 
-    public void positionFlag() {
+    public void flagMode() {
         if (!placingFlag) {
-            paintBackground.setColor(Color.DKGRAY);
+            paintBackground.setColor(Color.rgb(137, 137, 137));
             placingFlag = true;
         } else {
-            paintBackground.setColor(Color.GRAY);
+            paintBackground.setColor(Color.rgb(181, 181, 181));
             placingFlag = false;
         }
 
