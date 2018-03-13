@@ -21,8 +21,8 @@ public class MainActivity extends AppCompatActivity {
 
         final MinesSweeperView game = findViewById(R.id.minesSweeper);
 
-        ShimmerFrameLayout shimmer = findViewById(R.id.shimmer);
-        shimmer.startShimmerAnimation();
+//        ShimmerFrameLayout shimmer = findViewById(R.id.shimmer);
+//        shimmer.startShimmerAnimation();
 
         Button restart = findViewById(R.id.restart);
         restart.setOnClickListener(new View.OnClickListener() {

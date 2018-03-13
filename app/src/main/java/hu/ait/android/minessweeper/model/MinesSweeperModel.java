@@ -114,7 +114,8 @@ public class MinesSweeperModel {
 
         for(int i = 0; i < gridLayout; i++){
             for(int j = 0; j < gridLayout; j++){
-                if(!gameField[i][j].wasClicked()){
+                if(gameField[i][j].getType() == MineField.BOMB
+                        && !gameField[i][j].isFlagged()){
                     return false;
                 }
             }
